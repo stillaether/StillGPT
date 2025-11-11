@@ -1,4 +1,4 @@
-# StillGPT
+# 🌀 StillGPT
 
 
 
@@ -28,9 +28,9 @@ StillGPT has **persistent conversational memory** implemented entirely client-si
 
   To use StillGPT open your browser and navigate to:
   
-    http://localhost:8000
+    https://stillaether.github.io/StillGPT
 
-  Or [CLICK HERE!](https://github.com/stillaether/StillGPT)
+  Or [CLICK HERE!](https://stillaether.github.io/StillGPT)
 
 
 ## 🧠 How StillGPT's Memory Works
