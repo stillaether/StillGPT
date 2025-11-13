@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StillGPT</title>
+  <title>StillGPT v1.1</title>
   <style>
     body {
       margin: 0;
@@ -390,12 +390,13 @@
       const out = await embedder(text, { pooling: 'mean', normalize: true });
       return out.tolist()[0];
     }
-    function topK(qVec, store, k = 3) {
-      return store
-        .map((it, idx) => ({ ...it, score: cosine(qVec, it.vec) }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, k);
-    }
+    function topK(qVec, store, k = 3, minScore = 0.8) {
+      return store
+        .map((it, idx) => ({ ...it, score: cosine(qVec, it.vec) }))
+        .filter(it => it.score >= minScore) // NEW: Filter by minimum relevance score
+        .sort((a, b) => b.score - a.score)
+        .slice(0, k);
+    }
 
     const STORE_CHATS = 'gc_chats_v1';
     const STORE_VECS = 'gc_vecs_v1';
@@ -569,7 +570,7 @@
     deviceInfo.textContent = hasWebGPU ? 'GPU' : 'CPU';
 
     function formatChatPrompt(userText) {
-      const system = 'You are a fun and helpful AI assistant named StillGPT, you love getting to know the user, and you remember the users preferances across chats.';
+      const system = 'You are a fun and helpful AI assistant named StillGPT, you love getting to know the user. You are equipped with a memories system, it will bring up memories you may find useful.';
       return (
         '<|start_of_role|>system<|end_of_role|>' + system + '<|end_of_text|>\n' +
         '<|start_of_role|>user<|end_of_role|>' + userText + '<|end_of_text|>\n' +
@@ -596,9 +597,12 @@
 
       try {
 
+         console.log("Searching for memories...");
+
         const qVec = await embed(prompt);
-        const memories = topK(qVec, mgr.vectors, 3).map(r => r.text);
-        const memoryBlock = memories.length ? '\n[Memory from previous chats: ' + memories.join(' | ') + ']' : '';
+        const memories = topK(qVec, mgr.vectors, 3, 0.8).map(r => r.text);
+        const memoryBlock = memories.length ? '\n[The StillGPT memories system found these relevant memories from previous chats: ' + memories.join(' | ') + '\nEnd memories list, ignore these System memories if they are irrelevant to the user request]' : '';
+        console.log("Memories search returned:" + memoryBlock);
         const promptWithMem = formatChatPrompt(prompt + memoryBlock);
 
         const generate = await getGenerator();
