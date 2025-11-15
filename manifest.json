@@ -2,12 +2,12 @@
   "name": "StillGPT - Local AI Chat",
   "short_name": "StillGPT",
   "description": "Local chatbot PWA with memory and a familiar interface. Run AI models directly in your browser with persistent conversational memory using vector embeddings.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#000000",
-  "theme_color": "#10a37f",
+  "theme_color": "#202123",
   "icons": [
     {
       "src": "/images/icon-192.png",
@@ -35,20 +35,6 @@
     }
   ],
   "categories": ["productivity", "utilities"],
-  "screenshots": [
-    {
-      "src": "/images/screenshot-540.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/images/screenshot-1280.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ],
   "shortcuts": [
     {
       "name": "New Chat",
@@ -70,6 +56,6 @@
     "params": {
       "text": "text"
     }
-  }
+  },
   "prefer_related_applications": false
 }
