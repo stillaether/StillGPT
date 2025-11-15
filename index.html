@@ -4,7 +4,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StillGPT v1.1</title>
+  <title>StillGPT v1.2</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+      console.log("[OK] service worker running");
+    }
+  </script>
+  
   <style>
     body {
       margin: 0;
@@ -344,7 +354,6 @@
 
 <body>
   <div class="app">
-    <!-- ======  NEW drawer  ====== -->
     <button id="toggleBtn">☰</button>
     <aside id="sidebar">
       <h3 style="text-align: center;">Chats</h3>
@@ -353,7 +362,6 @@
       <div id="chatList"></div>
     </aside>
 
-    <!-- ======  original column  ====== -->
     <div style="flex:1;display:flex;flex-direction:column">
       <header style="text-align: center;">
         StillGPT
@@ -375,7 +383,7 @@
 
   <script type="module">
 
-    import { pipeline, TextStreamer, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.5 ";
+    import { pipeline, TextStreamer, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.5  ";
 
     const embModel = 'Xenova/all-MiniLM-L12-v2';
     let embedder;
@@ -386,17 +394,17 @@
       return dot / (Math.sqrt(na) * Math.sqrt(nb) || 1);
     }
     async function embed(text) {
-      if (!embedder) embedder = await pipeline('feature-extraction', embModel, { device: 'webgpu', dtype: 'int8' });
+      if (!embedder) embedder = await pipeline('feature-extraction', embModel, { device, dtype: 'int8' });
       const out = await embedder(text, { pooling: 'mean', normalize: true });
       return out.tolist()[0];
     }
     function topK(qVec, store, k = 3, minScore = 0.8) {
-      return store
-        .map((it, idx) => ({ ...it, score: cosine(qVec, it.vec) }))
-        .filter(it => it.score >= minScore) // NEW: Filter by minimum relevance score
-        .sort((a, b) => b.score - a.score)
-        .slice(0, k);
-    }
+      return store
+        .map((it, idx) => ({ ...it, score: cosine(qVec, it.vec) }))
+        .filter(it => it.score >= minScore) // NEW: Filter by minimum relevance score
+        .sort((a, b) => b.score - a.score)
+        .slice(0, k);
+    }
 
     const STORE_CHATS = 'gc_chats_v1';
     const STORE_VECS = 'gc_vecs_v1';
@@ -653,8 +661,29 @@
         sendBtn.disabled = false; checkTokenLimit();
       }
     });
+    
+    function handleSharedText() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedText = urlParams.get('text');
+        
+        if (sharedText && urlParams.get('shared') === 'true') {
+          const chatId = mgr.create('Shared message');
+          mgr.select(chatId);
+          loadChat();
+          renderSidebar();
+          chatInput.value = sharedText;
+          chatInput.focus();
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (err) {
+        console.error('StillGPT: Error handling shared text:', err);
+      }
+    }
+    handleSharedText();
 
-    loadChat(); renderSidebar();
+    loadChat(); 
+    renderSidebar();
   </script>
 
 </body>
